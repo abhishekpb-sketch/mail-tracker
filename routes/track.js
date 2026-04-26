@@ -35,6 +35,15 @@ router.get('/:trackingId.gif', async (req, res) => {
     const userAgent = req.headers['user-agent'] || 'unknown';
     const now = new Date();
 
+    const emailInfo = await Email.findOne({ trackingId });
+    if (!emailInfo) return; // silently ignore if not found
+
+    // Ignore opens that happen within 5 seconds of sending (likely Gmail pre-fetching or sender viewing in Sent folder)
+    const timeSinceSent = now.getTime() - new Date(emailInfo.sentAt).getTime();
+    if (timeSinceSent < 5000) {
+      return; // Ignore this immediate open event
+    }
+
     // Update email record
     await Email.findOneAndUpdate(
       { trackingId },
