@@ -94,6 +94,30 @@ router.get('/', async (req, res) => {
 });
 
 /**
+ * PATCH /api/emails/:trackingId
+ * Updates subject and recipient after pre-registration.
+ * Called by the extension at send time.
+ */
+router.patch('/:trackingId', async (req, res) => {
+  try {
+    const { subject, recipient } = req.body;
+    const update = {};
+    if (subject) update.subject = subject;
+    if (recipient) update.recipient = recipient;
+
+    const email = await Email.findOneAndUpdate(
+      { trackingId: req.params.trackingId },
+      { $set: update },
+      { new: true }
+    );
+    if (!email) return res.status(404).json({ error: 'Email not found' });
+    res.json(email);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update email' });
+  }
+});
+
+/**
  * GET /api/emails/:trackingId
  * Returns a single email with its events.
  */

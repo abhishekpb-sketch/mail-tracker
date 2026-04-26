@@ -9,7 +9,7 @@ const PORT = process.env.PORT || 3000;
 // ─── Middleware ───────────────────────────────────────────────────────────────
 app.use(cors({
   origin: '*', // Allow dashboard + extension
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
   allowedHeaders: ['Content-Type', 'x-api-key']
 }));
 app.use(express.json());
