@@ -11,26 +11,29 @@ const Email = require('../models/Email');
  */
 router.post('/', async (req, res) => {
   try {
-    const { subject, recipient, senderEmail } = req.body;
+    const { subject, recipient, senderEmail, trackingId, excludedRecipients } = req.body;
 
     if (!subject || !recipient) {
       return res.status(400).json({ error: 'subject and recipient are required' });
     }
 
-    const trackingId = uuidv4();
+    // Use provided trackingId or generate one (fallback for old clients)
+    const finalTrackingId = trackingId || uuidv4();
     const baseUrl = process.env.BASE_URL || `https://${req.get('host')}`;
-    const pixelUrl = `${baseUrl}/track/${trackingId}.gif`;
+    const pixelUrl = `${baseUrl}/track/${finalTrackingId}.gif`;
 
     const email = await Email.create({
-      trackingId,
+      trackingId: finalTrackingId,
       subject,
       recipient,
       senderEmail: senderEmail || '',
       sentAt: new Date(),
+      excludedRecipients: excludedRecipients || [],
+      hasExcludedRecipients: excludedRecipients && excludedRecipients.length > 0
     });
 
     res.status(201).json({
-      trackingId,
+      trackingId: finalTrackingId,
       pixelUrl,
       email,
     });

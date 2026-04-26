@@ -61,7 +61,7 @@ router.get('/:trackingId.gif', async (req, res) => {
 /**
  * GET /track/click/:trackingId
  * Records a link click and redirects to the target URL.
- * Usage: /track/click/:id?url=https://example.com
+ * Usage: /track/click/:id?url=https://example.com&lid=0&lbl=ClickHere
  */
 router.get('/click/:trackingId', async (req, res) => {
   const { trackingId } = req.params;
@@ -78,6 +78,11 @@ router.get('/click/:trackingId', async (req, res) => {
       'unknown';
     const userAgent = req.headers['user-agent'] || 'unknown';
 
+    // Decode parameters safely
+    const originalUrl = targetUrl !== 'https://google.com' ? targetUrl : '';
+    const linkIndex = req.query.lid ? parseInt(req.query.lid, 10) : null;
+    const linkLabel = req.query.lbl ? req.query.lbl : '';
+
     await Email.findOneAndUpdate(
       { trackingId },
       { $inc: { clicks: 1 } }
@@ -89,6 +94,9 @@ router.get('/click/:trackingId', async (req, res) => {
       timestamp: new Date(),
       userAgent,
       ip,
+      targetUrl: originalUrl,
+      linkIndex: isNaN(linkIndex) ? null : linkIndex,
+      linkLabel: linkLabel.substring(0, 100), // truncate if too long
     });
   } catch (err) {
     console.error('Click track error:', err.message);
