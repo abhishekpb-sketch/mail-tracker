@@ -20,6 +20,10 @@ const emailSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    senderIp: {
+      type: String,
+      default: '',
+    },
     sentAt: {
       type: Date,
       default: Date.now,

@@ -17,16 +17,18 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'subject and recipient are required' });
     }
 
-    // Use provided trackingId or generate one (fallback for old clients)
     const finalTrackingId = trackingId || uuidv4();
     const baseUrl = process.env.BASE_URL || `https://${req.get('host')}`;
     const pixelUrl = `${baseUrl}/track/${finalTrackingId}.gif`;
+    
+    const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || 'unknown';
 
     const email = await Email.create({
       trackingId: finalTrackingId,
       subject,
       recipient,
       senderEmail: senderEmail || '',
+      senderIp: ip,
       sentAt: new Date(),
     });
 

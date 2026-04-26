@@ -38,6 +38,20 @@ router.get('/:trackingId.gif', async (req, res) => {
     const emailInfo = await Email.findOne({ trackingId });
     if (!emailInfo) return; // silently ignore if not found
 
+    // Prevent immediate self-opens!
+    // If the open happens within 10 seconds of the email being sent, it is the sender's own browser.
+    const timeSinceSent = now.getTime() - new Date(emailInfo.sentAt).getTime();
+    if (timeSinceSent < 10000) {
+      console.log(`[MailTracker] Ignoring immediate self-open (too soon) for ${trackingId}`);
+      return;
+    }
+
+    // Ignore opens from the exact same IP address that sent the email
+    if (emailInfo.senderIp && emailInfo.senderIp !== 'unknown' && emailInfo.senderIp === ip) {
+      console.log(`[MailTracker] Ignoring self-open from sender IP ${ip} for ${trackingId}`);
+      return;
+    }
+
     // Ignore Google's image proxy pre-fetch (Gmail routes pixels through their servers
     // before delivering to recipients — these show up as GoogleImageProxy user-agents)
     const uaLower = userAgent.toLowerCase();
