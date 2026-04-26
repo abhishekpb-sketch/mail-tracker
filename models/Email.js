@@ -41,18 +41,6 @@ const emailSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
-    // ── Excluded recipients ──────────────────────────────
-    // Emails that were in To/CC but are on the excluded list.
-    // Opens/clicks from these addresses cannot be filtered server-side
-    // (email tracking limitation), but the dashboard warns the user.
-    excludedRecipients: {
-      type: [String],
-      default: [],
-    },
-    hasExcludedRecipients: {
-      type: Boolean,
-      default: false,
-    },
   },
   { timestamps: true }
 );

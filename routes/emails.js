@@ -11,7 +11,7 @@ const Email = require('../models/Email');
  */
 router.post('/', async (req, res) => {
   try {
-    const { subject, recipient, senderEmail, trackingId, excludedRecipients } = req.body;
+    const { subject, recipient, senderEmail, trackingId } = req.body;
 
     if (!subject || !recipient) {
       return res.status(400).json({ error: 'subject and recipient are required' });
@@ -28,8 +28,6 @@ router.post('/', async (req, res) => {
       recipient,
       senderEmail: senderEmail || '',
       sentAt: new Date(),
-      excludedRecipients: excludedRecipients || [],
-      hasExcludedRecipients: excludedRecipients && excludedRecipients.length > 0
     });
 
     res.status(201).json({
